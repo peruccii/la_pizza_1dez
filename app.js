@@ -31,6 +31,8 @@ const app = express()
 const controllerProduto = require('./controller/controllerProduto.js')
 const controllerAcompanhamento = require('./controller/controllerAcompanhamento.js')
 const controllerLogin = require('./controller/controllerLogin.js')
+const controllerContatos = require('./controller/controllerContatos.js')
+const { selectContactByID } = require('./model/DAO/sugestao.js')
 
 app.use((request, response, next) => {
 
@@ -52,11 +54,12 @@ const jsonParser = bodyParser.json()
 
 //EndPoint listar produtos
 app.get('/v1/produtos', cors(), async function(request,response,next){
+ 
 
     let statusCode
     let message = {}
 
-    const controllerProduto = require('./controller/controllerProduto.js')
+   const controllerProduto = require('./controller/controllerProduto.js')
 
     const dadosProdutos = await controllerProduto.listarProdutos()
 
@@ -72,38 +75,71 @@ app.get('/v1/produtos', cors(), async function(request,response,next){
     response.json(message)
 })
 
-app.get('/v1/produtos/pizza', cors(), async (request, response, next) => {
-    const dadosPizza = await controllerProduto.listarPizzas()
-    if (dadosPizza) {
+app.get('/v1/produtos/:id', cors(), async function (request, response, next){
+ 
+    let chave = request.params.id
+    const dadosContatos = await controllerProduto.buscarProduto(chave)
+    if (dadosContatos) {
 
         statusCode = 200
-        message = dadosPizza
+        message = dadosContatos
 
     } else {
         statusCode = 400
         message = MESSAGE_ERROR.NOT_FOUND_DB
     }
     response.status(statusCode)
-    response.json(message)
+   response.json(message)
 })
 
-app.get('/v1/produtos/bebida', cors(), async (request, response, next) => {
-    const dadosBebida = await controllerProduto.listarBebidas()
-    if (dadosBebida) {
 
-        statusCode = 200
-        message = dadosBebida
 
-    } else {
-        statusCode = 400
-        message = MESSAGE_ERROR.NOT_FOUND_DB
+
+app.get('/v1/pizzas', cors(), async function (request, response, next) {
+   
+    let statusCode
+    let message = {}
+
+    const controllerProduto = require('./controller/controllerProduto.js')
+
+    const dadosProdutos = await controllerProduto.listarPizzas()
+
+    if (dadosProdutos) {
+        statusCode = 200   
+        message = dadosProdutos
+    } else{
+        statusCode = 404
+        message.message = MESSAGE_ERROR.NOT_FOUND_DB
     }
+
     response.status(statusCode)
-    response.json(message)
+   response.json(message)
+})
+
+app.get('/v1/bebidas', cors(), async (request, response, next) => {
+    
+    let statusCode
+    let message = {}
+
+    const controllerProduto = require('./controller/controllerProduto.js')
+
+    const dadosBebidas = await controllerProduto.listarBebidas()
+
+    if (dadosBebidas) {
+        statusCode = 200   
+        message = dadosBebidas
+    } else{
+        statusCode = 404
+        message.message = MESSAGE_ERROR.NOT_FOUND_DB
+    }
+
+    response.status(statusCode)
+   response.json(message)
 })
 
 app.get('/v1/login', cors(), async (request, response, next) => {
-    const dadosLogin = await controllerLogin.listarLogin()
+   
+   const dadosLogin = await controllerLogin.listarLogin()
     if (dadosLogin) {
 
         statusCode = 200
@@ -114,26 +150,27 @@ app.get('/v1/login', cors(), async (request, response, next) => {
         message = MESSAGE_ERROR.NOT_FOUND_DB
     }
     response.status(statusCode)
-    response.json(message)
+   response.json(message)
 })
 
 app.get('/v1/produtos/acompanhamento', cors(), async (request, response, next) => {
+   
     const dadosAcompanhamento = await controllerAcompanhamento.listarAcompanhamento()
     if (dadosAcompanhamento) {
 
-        statusCode = 200
+      statusCode = 200
         message = dadosAcompanhamento
 
     } else {
         statusCode = 400
         message = MESSAGE_ERROR.NOT_FOUND_DB
-    }
+   }
     response.status(statusCode)
     response.json(message)
 })
 
 app.get('/v1/contatos', cors(), async (request, response, next) => {
-    const dadosContatos = await controllerContato.listarContatos()
+    const dadosContatos = await controllerContatos.listarContato()
     if (dadosContatos) {
 
         statusCode = 200
@@ -147,7 +184,23 @@ app.get('/v1/contatos', cors(), async (request, response, next) => {
     response.json(message)
 })
 
-app.post('/v1/produto', cors(), jsonParser, async function (request, response) {
+app.get('/v1/contatos/:id', cors(), async function (request, response, next){
+    let chave = request.params.id
+    const dadosContatos = await controllerContatos.buscarContato(chave)
+    if (dadosContatos) {
+
+        statusCode = 200
+        message = dadosContatos
+
+    } else {
+        statusCode = 400
+        message = MESSAGE_ERROR.NOT_FOUND_DB
+    }
+    response.status(statusCode)
+    response.json(message)
+})
+
+app.post('/v1/inserirpizza', cors(), jsonParser, async function (request, response) {
 
     let statusCode
     let message
@@ -189,6 +242,27 @@ app.post('/v1/produto', cors(), jsonParser, async function (request, response) {
     response.status(statusCode)
     response.json(message)
 
+})
+
+app.get('/v1/promocao', cors(), async function (request, response, next) {
+   
+    let statusCode
+    let message = {}
+
+    const controllerProduto = require('./controller/controllerProduto.js')
+
+    const dadosProdutos = await controllerProduto.listarPromocao()
+
+    if (dadosProdutos) {
+        statusCode = 200   
+        message = dadosProdutos
+    } else{
+        statusCode = 404
+        message.message = MESSAGE_ERROR.NOT_FOUND_DB
+    }
+
+    response.status(statusCode)
+   response.json(message)
 })
 
 app.listen(8080, function() {

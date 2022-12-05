@@ -57,8 +57,28 @@ const selectAllContacts = async () => {
     }
 }
 
+const selectContactByID = async (id) => {
+
+    const { PrismaClient } = require('@prisma/client')
+
+    const prisma = new PrismaClient()
+
+    const sql = `select * from tbl_contato where id = ${id}`
+    const search = await prisma.$queryRawUnsafe(sql)
+
+  
+
+    if (search.length > 0){
+        return search
+    }else{
+        return false
+    }
+
+}
+
 module.exports = {
     selectAllContacts,
     insertContact,
-    deleteContact
+    deleteContact,
+    selectContactByID
 }
