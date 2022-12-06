@@ -357,7 +357,6 @@ app.post('/v1/inserirpizza', cors(), jsonParser, async function (request, respon
             //encaminha os dados do body
             const novapizza = await controllerProduto.novaPizza(dadosBody)
 
-
             statusCode = novapizza.status
             message = novapizza.message
 

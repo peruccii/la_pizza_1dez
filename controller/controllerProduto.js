@@ -141,7 +141,7 @@ const listarPromocao = async function(){
 }
 
 const novaPizza = async function (pizza){
-    if(pizza.id_produto =='' || pizza.id_produto == undefined || pizza.descricao == '' || pizza.descricao == undefined){
+    if(pizza.descricao == '' || pizza.descricao == undefined || pizza.id_produto =='' || pizza.id_produto == undefined){
         return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     }else{
     const novaPizzaa = require('../model/DAO/produto.js')
@@ -150,18 +150,18 @@ const novaPizza = async function (pizza){
     if(newPizza){
         return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
     }else{
-        return {status:500, message:MESSAGE_ERROR.INTERNAL_ERROR_DB}
+        return {status:500, message:MESSAGE_ERROR.INTERNAL_SERVER_ERROR}
     }
        
    }
 }
 
 const novoProduto = async function(produto){
-    if(produto.nome =='' || produto.nome == undefined || produto.foto =='' || produto.foto == undefined || produto.preco =='' || produto.preco == undefined){
-        
+    if(produto.nome =='' || produto.nome == undefined || produto.preco =='' || produto.preco == undefined|| produto.foto =='' || produto.foto == undefined){ 
         return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     }else{
         const novoProduto = require('../model/DAO/produto.js')
+
 
             const rsProduto = await novoProduto.insertProduto(produto)
          
