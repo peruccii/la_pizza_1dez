@@ -28,7 +28,7 @@ const selectAllPizzas = async function() {
     const prisma = new PrismaClient()
 
 
-    let sql = `select tbl_produto.nome, tbl_produto.foto as produtoFoto, tbl_produto.preco, tbl_pizza.descricao, tbl_produto.status_promocao, tbl_produto.status_favoritos, tbl_produto.id from tbl_produto
+    let sql = `select tbl_produto.nome, tbl_produto.foto, tbl_produto.preco, tbl_pizza.descricao, tbl_produto.status_promocao, tbl_produto.status_favoritos, tbl_produto.id from tbl_produto
     inner join tbl_pizza 
         on tbl_produto.id = tbl_pizza.id_produto`
     

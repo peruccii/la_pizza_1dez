@@ -59,6 +59,8 @@ const deletarProduto = async (id) => {
     }
 }
 
+
+
 const listarPizzas = async function(){
     let dadosProdutosJSON = {}
 
@@ -74,6 +76,32 @@ const listarPizzas = async function(){
     
     return dadosProdutosJSON
 
+}
+
+const atualizarPizza = async function(pizza){
+    if(pizza.id == '' || pizza.id == undefined){
+        return {status: 400, message:MESSAGE_ERROR.REQUIRED_ID}
+    }else if(pizza.descricao =='' || pizza.descricao == undefined || pizza.id_produto =='' || pizza.id_produto == undefined){
+        return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
+    }else{
+        const atualizar = require('../model/dao/produto.js')
+
+     
+
+            const verificar = await atualizar.selectProdutoById(pizza.id)
+
+            if(verificar){
+                const rsPizza = await atualizar.updatePizza(pizza)
+    
+                if(rsPizza){
+                    return {status: 200, message: MESSAGE_SUCCESS.UPDATE_ITEM}
+                } else{
+                    return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+                }
+            }else{
+                return {status:400, message: MESSAGE_ERROR.NOT_FOUND_DB}
+            }
+    }
 }
 
 const listarBebidas = async function(){
@@ -112,9 +140,37 @@ const listarPromocao = async function(){
     
 }
 
-const novaPizza = async (pizza) => {
+const novaPizza = async function (pizza){
+    if(pizza.id_produto =='' || pizza.id_produto == undefined || pizza.descricao == '' || pizza.descricao == undefined){
+        return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
+    }else{
+    const novaPizzaa = require('../model/DAO/produto.js')
+    const newPizza = await novaPizzaa.insertPizza(pizza)
 
- 
+    if(newPizza){
+        return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+    }else{
+        return {status:500, message:MESSAGE_ERROR.INTERNAL_ERROR_DB}
+    }
+       
+   }
+}
+
+const novoProduto = async function(produto){
+    if(produto.nome =='' || produto.nome == undefined || produto.foto =='' || produto.foto == undefined || produto.preco =='' || produto.preco == undefined){
+        
+        return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
+    }else{
+        const novoProduto = require('../model/DAO/produto.js')
+
+            const rsProduto = await novoProduto.insertProduto(produto)
+         
+            if(rsProduto){
+                return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+            }else{
+                return {status:500, message:MESSAGE_ERROR.INTERNAL_SERVER_ERROR}
+            }
+    }
 }
 
 const buscarProduto = async function(id){
@@ -142,6 +198,9 @@ module.exports = {
     listarBebidas,
     novaPizza,
     buscarProduto,
-   listarPromocao
+   listarPromocao,
+   novoProduto,
+   deletarProduto,
+   atualizarPizza
   
 }

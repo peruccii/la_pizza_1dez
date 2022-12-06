@@ -75,6 +75,75 @@ app.get('/v1/produtos', cors(), async function(request,response,next){
     response.json(message)
 })
 
+app.post('/v1/inserirproduto', cors(), jsonParser, async function (request, response) {
+
+    let statusCode
+    let message
+    let headerContentType
+
+    //recebe o tipo de content-type que foi enviado no header da aquisicao  
+    headerContentType = request.headers['content-type']
+
+    //validar se content type é do tipo  
+    //v1/application/json
+    if (headerContentType == 'application/json') {
+
+        //recebe do corpo da mensagem conteudo
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+
+            const controllerProduto = require('./controller/controllerProduto.js')
+            //encaminha os dados do body
+            const novoproduto = await controllerProduto.novoProduto(dadosBody)
+
+
+            statusCode = novoproduto.status
+            message = novoproduto.message
+
+        } else {
+
+            statusCode = 404
+            message = MESSAGE_ERROR.EMPTY_BODY
+
+        }
+
+    } else {
+
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+
+    }
+    response.status(statusCode)
+    response.json(message)
+
+})
+
+//Endpoint para deletar o produto pelo id
+app.delete('/v1/apagar/produto/:id', cors(), async function(request, response){
+    let message
+    let id = request.params.id
+    let statusCode
+
+    if(id != '' && id != undefined){
+        const controllerProduto = require('./controller/controllerProduto.js')
+        const apagar = await controllerProduto.deletarProduto(id)
+    
+        statusCode = apagar.status
+        message = apagar.message
+    }else{
+    
+        statusCode= 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    
+    }
+
+    response.status(statusCode)
+    response.json(message)
+
+})
+
+//Endpoint para buscar o produto pelo id
 app.get('/v1/produtos/:id', cors(), async function (request, response, next){
  
     let chave = request.params.id
@@ -92,9 +161,7 @@ app.get('/v1/produtos/:id', cors(), async function (request, response, next){
    response.json(message)
 })
 
-
-
-
+//Endpoint para listar todas as pizzas
 app.get('/v1/pizzas', cors(), async function (request, response, next) {
    
     let statusCode
@@ -116,6 +183,47 @@ app.get('/v1/pizzas', cors(), async function (request, response, next) {
    response.json(message)
 })
 
+//Endpoint para atualizar uma pizza pelo id
+app.put('/v1/atualizar/pizza/:id',jsonParser, cors(), async function(request, response){
+    let statusCode
+    let message
+    let headerContentType
+
+    headerContentType = request.headers['content-type']
+
+    if(headerContentType== 'application/json'){
+        let dadosBody = request.body
+
+        if(JSON.stringify(dadosBody)!= '{}'){
+            let id = request.params.id
+
+            if(id != '' && id != undefined){
+                dadosBody.id = id
+
+                const controllerProduto = require('./controller/controllerProduto.js')
+
+                const atualizar = await controllerProduto.atualizarPizza(dadosBody)
+
+                statusCode = atualizar.status
+                message = atualizar.message
+            }else{
+                statusCode = 400
+                message= MESSAGE_ERROR.REQUIRED_ID
+            }
+        }else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    }else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+
+    response.status(statusCode)
+    response.json(message)
+})
+
+//Endpoint para listar todas as bebidas
 app.get('/v1/bebidas', cors(), async (request, response, next) => {
     
     let statusCode
@@ -153,6 +261,7 @@ app.get('/v1/login', cors(), async (request, response, next) => {
    response.json(message)
 })
 
+//Endpoint para listar todos os acompanhamentos
 app.get('/v1/produtos/acompanhamento', cors(), async (request, response, next) => {
    
     const dadosAcompanhamento = await controllerAcompanhamento.listarAcompanhamento()
@@ -169,6 +278,7 @@ app.get('/v1/produtos/acompanhamento', cors(), async (request, response, next) =
     response.json(message)
 })
 
+//Endpoint para listar todos os contatos existentes
 app.get('/v1/contatos', cors(), async (request, response, next) => {
     const dadosContatos = await controllerContatos.listarContato()
     if (dadosContatos) {
@@ -184,6 +294,7 @@ app.get('/v1/contatos', cors(), async (request, response, next) => {
     response.json(message)
 })
 
+//Endpoint para buscar contato cliente
 app.get('/v1/contatos/:id', cors(), async function (request, response, next){
     let chave = request.params.id
     const dadosContatos = await controllerContatos.buscarContato(chave)
@@ -198,6 +309,30 @@ app.get('/v1/contatos/:id', cors(), async function (request, response, next){
     }
     response.status(statusCode)
     response.json(message)
+})
+//Endpoint para deletar contato cliente
+app.delete('/v1/excluir/contato/:id', cors(), jsonParser, async function (request, response) {
+
+    let statusCode
+    let message
+    let id = request.params.id
+
+    if(id != '' && id != undefined){
+        const controllerContatos = require('./controller/controllerContatos.js')
+        const deletarContatoo = await controllerContatos.deletarContato(id)
+    
+        statusCode = deletarContatoo.status
+        message = deletarContatoo.message
+    }else{
+    
+        statusCode = 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    
+    }
+
+    response.status(statusCode)
+    response.json(message)
+
 })
 
 app.post('/v1/inserirpizza', cors(), jsonParser, async function (request, response) {
@@ -243,7 +378,7 @@ app.post('/v1/inserirpizza', cors(), jsonParser, async function (request, respon
     response.json(message)
 
 })
-
+//Endpoint para listar produtos em promocao
 app.get('/v1/promocao', cors(), async function (request, response, next) {
    
     let statusCode
@@ -264,6 +399,22 @@ app.get('/v1/promocao', cors(), async function (request, response, next) {
     response.status(statusCode)
    response.json(message)
 })
+
+//Endpoint insert contato
+
+//Endpoint delete contato
+
+//Insert login
+
+//Delete pizza
+
+//Delete bebida
+
+//Delete sugestao/mensagem
+
+//Insert bebida
+
+//Insert descricao
 
 app.listen(8080, function() {
     console.log('Aguardando requisições')
