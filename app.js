@@ -61,9 +61,10 @@ app.get('/v1/produtos', cors(), async function(request,response,next){
 
    const controllerProduto = require('./controller/controllerProduto.js')
 
-    const dadosProdutos = await controllerProduto.listarProdutos()
+    const dadosProdutos = await controllerProduto.listarProdutos() 
 
     if (dadosProdutos) {
+        
         statusCode = 200   
         message = dadosProdutos
     } else{
@@ -119,26 +120,91 @@ app.post('/v1/inserirproduto', cors(), jsonParser, async function (request, resp
 
 })
 
-//Endpoint para deletar o produto pelo id
-app.delete('/v1/apagar/produto/:id', cors(), async function(request, response){
+app.post('/v1/inserir/contato', cors(), jsonParser, async function (request, response) {
+
+    let statusCode
+    let message
+    let headerContentType
+
+    //recebe o tipo de content-type que foi enviado no header da aquisicao  
+    headerContentType = request.headers['content-type']
+
+    //validar se content type é do tipo  
+    //v1/application/json
+    if (headerContentType == 'application/json') {
+
+        //recebe do corpo da mensagem conteudo
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+           
+            const controllerContatos = require('./controller/controllerContatos.js')
+            //encaminha os dados do body
+            const novocontato = await controllerContatos.criarContato(dadosBody)
+           
+
+            statusCode = novocontato.status
+            message = novocontato.message
+
+        } else {
+
+            statusCode = 404
+            message = MESSAGE_ERROR.EMPTY_BODY
+
+        }
+
+    } else {
+
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+
+    }
+    response.status(statusCode)
+    response.json(message)
+
+})
+
+app.delete('/v1/apagar/contato/:id', cors(), async function(request, response){
     let message
     let id = request.params.id
-    let statusCode
+    let status
 
     if(id != '' && id != undefined){
-        const controllerProduto = require('./controller/controllerProduto.js')
-        const apagar = await controllerProduto.deletarProduto(id)
+        const apagar = await controllerContatos.deletarContato(id)
     
-        statusCode = apagar.status
+        status = apagar.status
         message = apagar.message
     }else{
     
-        statusCode= 400
+        status= 400
         message = MESSAGE_ERROR.REQUIRED_ID
     
     }
 
-    response.status(statusCode)
+    response.status(status)
+    response.json(message)
+
+})
+
+//Endpoint para deletar o produto pelo id
+app.delete('/v1/apagar/produto/:id', cors(), async function(request, response){
+    let message
+    let id = request.params.id
+    let status
+
+    if(id != '' && id != undefined){
+        const apagar = await controllerProduto.deletarProduto(id)
+    
+        status = apagar.status
+        message = apagar.message
+    }else{
+    
+        status= 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    
+    }
+
+    response.status(status)
     response.json(message)
 
 })
@@ -184,7 +250,7 @@ app.get('/v1/pizzas', cors(), async function (request, response, next) {
 })
 
 //Endpoint para atualizar uma pizza pelo id
-app.put('/v1/atualizar/pizza/:id',jsonParser, cors(), async function(request, response){
+app.put('/v1/atualizar/produto/:id',jsonParser, cors(), async function (request, response){
     let statusCode
     let message
     let headerContentType
@@ -196,14 +262,55 @@ app.put('/v1/atualizar/pizza/:id',jsonParser, cors(), async function(request, re
 
         if(JSON.stringify(dadosBody)!= '{}'){
             let id = request.params.id
-
+           
             if(id != '' && id != undefined){
+               
                 dadosBody.id = id
-
+                
                 const controllerProduto = require('./controller/controllerProduto.js')
 
-                const atualizar = await controllerProduto.atualizarPizza(dadosBody)
+                const atualizar = await controllerProduto.atualizarProduto(dadosBody)
+                    
+                statusCode = atualizar.status
+                message = atualizar.message
+            }else{
+                statusCode = 400
+                message= MESSAGE_ERROR.REQUIRED_ID
+            }
+        }else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    }else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
 
+    response.status(statusCode)
+    response.json(message)
+})
+
+app.put('/v1/atualizar/contato/:id',jsonParser, cors(), async function (request, response){
+    let statusCode
+    let message
+    let headerContentType
+
+    headerContentType = request.headers['content-type']
+
+    if(headerContentType== 'application/json'){
+        let dadosBody = request.body
+
+        if(JSON.stringify(dadosBody)!= '{}'){
+            let id = request.params.id
+           
+            if(id != '' && id != undefined){
+               
+                dadosBody.id = id
+                
+                const controllerContatos = require('./controller/controllerContatos.js')
+
+                const atualizar = await controllerContatos.atualizarContato(dadosBody)
+               
                 statusCode = atualizar.status
                 message = atualizar.message
             }else{
@@ -297,6 +404,7 @@ app.get('/v1/contatos', cors(), async (request, response, next) => {
 //Endpoint para buscar contato cliente
 app.get('/v1/contatos/:id', cors(), async function (request, response, next){
     let chave = request.params.id
+   
     const dadosContatos = await controllerContatos.buscarContato(chave)
     if (dadosContatos) {
 
@@ -399,21 +507,217 @@ app.get('/v1/promocao', cors(), async function (request, response, next) {
    response.json(message)
 })
 
-//Endpoint insert contato
+app.get('/v1/favoritos', cors(), async function (request, response, next) {
+   
+    let statusCode
+    let message = {}
 
-//Endpoint delete contato
+    const controllerProduto = require('./controller/controllerProduto.js')
 
-//Insert login
+    const dadosProdutos = await controllerProduto.listarFavorito()
 
-//Delete pizza
+    if (dadosProdutos) {
+        statusCode = 200   
+        message = dadosProdutos
+    } else{
+        statusCode = 404
+        message.message = MESSAGE_ERROR.NOT_FOUND_DB
+    }
 
-//Delete bebida
+    response.status(statusCode)
+   response.json(message)
+})
 
-//Delete sugestao/mensagem
+app.get('/v1/servicos', cors(), async function (request, response, next) {
+   
+    let statusCode
+    let message = {}
 
-//Insert bebida
+    const controllerServicos = require('./controller/controllerServicos.js')
 
-//Insert descricao
+    const dadosServicos = await controllerServicos.listarServico()
+
+    if (dadosServicos) {
+        statusCode = 200   
+        message = dadosServicos
+    } else{
+        statusCode = 404
+        message.message = MESSAGE_ERROR.NOT_FOUND_DB
+    }
+
+    response.status(statusCode)
+   response.json(message)
+})
+
+app.get('/v1/servicos/:id', cors(), async function (request, response, next){
+    let chave = request.params.id
+   
+    const controllerServicos = require('./controller/controllerServicos.js')
+    const dadosServicos = await controllerServicos.buscarServico(chave)
+    if (dadosServicos) {
+
+        statusCode = 200
+        message = dadosServicos
+
+    } else {
+        statusCode = 400
+        message = MESSAGE_ERROR.NOT_FOUND_DB
+    }
+    response.status(statusCode)
+    response.json(message)
+})
+
+app.delete('/v1/apagar/servico/:id', cors(), jsonParser, async function (request, response) {
+
+    let statusCode
+    let message
+    let id = request.params.id
+
+    if(id != '' && id != undefined){
+        const controllerServicos = require('./controller/controllerServicos.js')
+        const deletarServicoo = await controllerServicos.deletarServico(id)
+    
+        statusCode = deletarServicoo.status
+        message = deletarServicoo.message
+    }else{
+    
+        statusCode = 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    
+    }
+
+    response.status(statusCode)
+    response.json(message)
+
+})
+
+app.post('/v1/inserir/servico', cors(), jsonParser, async function (request, response) {
+
+    let statusCode
+    let message
+    let headerContentType
+
+    //recebe o tipo de content-type que foi enviado no header da aquisicao  
+    headerContentType = request.headers['content-type']
+
+    //validar se content type é do tipo  
+    //v1/application/json
+    if (headerContentType == 'application/json') {
+
+        //recebe do corpo da mensagem conteudo
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+           
+            const controllerServicos = require('./controller/controllerServicos.js')
+            //encaminha os dados do body
+            const novoservico = await controllerServicos.criarServico(dadosBody)
+           
+
+            statusCode = novoservico.status
+            message = novoservico.message
+
+        } else {
+
+            statusCode = 404
+            message = MESSAGE_ERROR.EMPTY_BODY
+
+        }
+
+    } else {
+
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+
+    }
+    response.status(statusCode)
+    response.json(message)
+
+})
+
+app.put('/v1/atualizar/servico/:id',jsonParser, cors(), async function (request, response){
+    let statusCode
+    let message
+    let headerContentType
+
+    headerContentType = request.headers['content-type']
+
+    if(headerContentType== 'application/json'){
+        let dadosBody = request.body
+
+        if(JSON.stringify(dadosBody)!= '{}'){
+            let id = request.params.id
+           
+            if(id != '' && id != undefined){
+               
+                dadosBody.id = id
+                
+                const controllerServicos = require('./controller/controllerServicos.js')
+
+                const atualizar = await controllerServicos.atualizarServico(dadosBody)
+               
+                statusCode = atualizar.status
+                message = atualizar.message
+            }else{
+                statusCode = 400
+                message= MESSAGE_ERROR.REQUIRED_ID
+            }
+        }else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    }else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+
+    response.status(statusCode)
+    response.json(message)
+})
+
+app.post('/v1/inserirbebida', cors(), jsonParser, async function (request, response) {
+
+    let statusCode
+    let message
+    let headerContentType
+
+    //recebe o tipo de content-type que foi enviado no header da aquisicao  
+    headerContentType = request.headers['content-type']
+
+    //validar se content type é do tipo  
+    //v1/application/json
+    if (headerContentType == 'application/json') {
+
+        //recebe do corpo da mensagem conteudo
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+            
+            const controllerProduto = require('./controller/controllerProduto.js')
+            //encaminha os dados do body
+            const novobebida = await controllerProduto.novaBebida(dadosBody)
+            
+
+            statusCode = novobebida.status
+            message = novobebida.message
+
+        } else {
+
+            statusCode = 404
+            message = MESSAGE_ERROR.EMPTY_BODY
+
+        }
+
+    } else {
+
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+
+    }
+    response.status(statusCode)
+    response.json(message)
+
+})
 
 app.listen(8080, function() {
     console.log('Aguardando requisições')

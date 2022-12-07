@@ -18,15 +18,16 @@ const listarProdutos = async function(){
     let dadosProdutosJSON = {}
 
     const { selectAllProdutos } = require('../model/DAO/produto.js')
+  
 
     const dadosProdutos = await selectAllProdutos()
-
+    
     if (dadosProdutos) {
 
         /* dadosAlunos.forEach(element => {
             element.id = Number(element.id)
         }); */
-
+       
         dadosProdutosJSON.produtos = dadosProdutos
         return dadosProdutosJSON
         
@@ -41,9 +42,9 @@ const deletarProduto = async (id) => {
     if (id == undefined || id == '') {
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_ID}
     }
-
+    
     const verificar = await produto.selectProdutoById(id)
-
+   
     if (verificar) {
         
         const deleteProduto = await produto.deleteProduto(id)
@@ -59,6 +60,32 @@ const deletarProduto = async (id) => {
     }
 }
 
+const atualizarProduto = async function(attpro)  {
+   
+     if(attpro.nome == '' || attpro.nome == undefined || attpro.foto == '' || attpro.foto == undefined || attpro.preco == '' || attpro.preco == undefined || attpro.descricao == '' || attpro.descricao == undefined ){
+        
+        return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
+    }else{
+    const atualizarProduto = require('../model/DAO/produto.js')
+    const verificar = await atualizarProduto.selectProdutoById(attpro.id)
+        
+    if (verificar) {
+        
+        const atualizeProduto = await atualizarProduto.updateProduto(attpro)
+        
+        if (atualizeProduto) {
+            
+            return {status: 200, message: MESSAGE_SUCCESS.UPDATE_ITEM}
+        } else{
+            return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+        }
+        
+    } else{
+        return {status: 404, message: MESSAGE_ERROR.NOT_FOUND_DB}
+    }
+ }
+}
+
 
 
 const listarPizzas = async function(){
@@ -67,6 +94,7 @@ const listarPizzas = async function(){
     const dadosProdutos = await produto.selectAllPizzas()
    
     if (dadosProdutos) {
+       
         dadosProdutosJSON.pizzas = dadosProdutos
         dadosProdutosJSON.status = 200
     } else{
@@ -129,7 +157,7 @@ const listarPromocao = async function(){
     const dados = await produto.selectAllPromocao()
     
     if (dados) {
-        promocaoJSON. promocao = dados
+        promocaoJSON.promocao = dados
         promocaoJSON.status = 200
     } else{
         promocaoJSON.message = MESSAGE_ERROR.NOT_FOUND_DB
@@ -137,6 +165,24 @@ const listarPromocao = async function(){
     }
     
     return  promocaoJSON
+    
+}
+
+const listarFavorito = async function(){
+    let favoritoJSON = {}
+    
+    
+    const dados = await produto.selectAllFavorito()
+    
+    if (dados) {
+        favoritoJSON.favoritos = dados
+        favoritoJSON.status = 200
+    } else{
+        favoritoJSON.message = MESSAGE_ERROR.NOT_FOUND_DB
+        favoritoJSON.status = 404
+    }
+    
+    return  favoritoJSON
     
 }
 
@@ -157,15 +203,34 @@ const novaPizza = async function (pizza){
 }
 
 const novoProduto = async function(produto){
-    if(produto.nome =='' || produto.nome == undefined || produto.preco =='' || produto.preco == undefined|| produto.foto =='' || produto.foto == undefined){ 
+    if(produto.nome =='' || produto.nome == undefined || produto.preco =='' || produto.preco == undefined|| produto.foto =='' || produto.foto == undefined  ||  produto.descricao =='' || produto.descricao == undefined){ 
         return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     }else{
-        const novoProduto = require('../model/DAO/produto.js')
-
-
-            const rsProduto = await novoProduto.insertProduto(produto)
+        const newProduto = require('../model/DAO/produto.js')
+         
+            const rsProduto = await newProduto.insertProduto(produto)
+            
          
             if(rsProduto){
+                return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+            }else{
+                return {status:500, message:MESSAGE_ERROR.INTERNAL_SERVER_ERROR}
+            }
+    }
+}
+
+const novaBebida = async function(bebida){
+    
+    if(bebida.litragem == undefined || bebida.teor_alcoolico == undefined){ 
+        return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
+        
+    }else{
+        const newProduto = require('../model/DAO/produto.js')
+         
+            const rsBebida = await newProduto.insertBebida(bebida)
+            
+         
+            if(rsBebida){
                 return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
             }else{
                 return {status:500, message:MESSAGE_ERROR.INTERNAL_SERVER_ERROR}
@@ -177,15 +242,18 @@ const buscarProduto = async function(id){
     let produtoJSON = {}
 
     const dados = await produto.selectProdutoById(id)
-
+    
     if(dados){
-        produtoJSON.produto = dados
+       
+        produtoJSON.IDPRODUTO = dados
         produtoJSON.status = 200
+    
     }else{
         produtoJSON.message = MESSAGE_ERROR.NOT_FOUND_DB
         produtoJSON.status = 404
     }
         return produtoJSON
+        
     }
 
 
@@ -201,6 +269,9 @@ module.exports = {
    listarPromocao,
    novoProduto,
    deletarProduto,
-   atualizarPizza
+   atualizarPizza,
+   atualizarProduto,
+   listarFavorito,
+   novaBebida
   
 }

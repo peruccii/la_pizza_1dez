@@ -9,11 +9,11 @@ const insertContact = async (mensagem) => {
 
     const prisma = new PrismaClient();
 
-    let sql = `insert into tbl_contato(nome, email, mensagem)
-                values( '${mensagem.nome}','${mensagem.email}','${mensagem.texto}')`;
-
+    const sql = `insert into tbl_contato(nome, email,numero,telefone, mensagem, id_ddd)
+                values( '${mensagem.nome}','${mensagem.email}','${mensagem.numero}','${mensagem.telefone}','${mensagem.mensagem}', ${mensagem.id_ddd})`;
+                
     const result = await prisma.$executeRawUnsafe (sql);
-
+   
     if (result) {
         return true;
     }else
@@ -46,6 +46,24 @@ const deleteContact = async (id) => {
     }                     
 }
 
+const updateContact = async (contato) => {
+    try {
+        
+    const sql = `update tbl_contato set nome = '${contato.nome}', email = '${contato.email}', numero = '${contato.numero}', telefone = '${contato.telefone}', mensagem = '${contato.mensagem}' where id = ${contato.id}`
+       
+    const result = await prisma.$executeRawUnsafe(sql)
+        
+    if(result){
+        return true
+    }else{
+        return false
+    }
+
+    }catch (error) {
+      return false
+    }
+}
+
 const selectAllContacts = async () => {
     const sql = `select * from tbl_contato order by id desc`
     const dadosC = await prisma.$queryRawUnsafe(sql)
@@ -68,7 +86,7 @@ const selectContactByID = async (id) => {
 
   
 
-    if (search.length > 0){
+    if (search){
         return search
     }else{
         return false
@@ -76,9 +94,12 @@ const selectContactByID = async (id) => {
 
 }
 
+
+
 module.exports = {
     selectAllContacts,
     insertContact,
     deleteContact,
-    selectContactByID
+    selectContactByID,
+    updateContact
 }
